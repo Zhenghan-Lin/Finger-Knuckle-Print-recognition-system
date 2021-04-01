@@ -16,3 +16,6 @@ class FeatureExtration:
         self.IMG_ROW = 110          # ROI图像的高，即行数
         self.IMG_COL = 220          # ROI图像的宽，即列数
         self.ROW_PLUS_COL = self.IMG_ROW * self.IMG_COL
+
+    def getGaborKernel(self):
+
