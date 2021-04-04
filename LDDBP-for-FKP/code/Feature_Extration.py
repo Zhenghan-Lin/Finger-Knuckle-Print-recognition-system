@@ -37,6 +37,7 @@ class FeatureExtraction:
     def lddbp_coding(self):
         gabor_kernels = self.obtainGaborKernel()
         convolutional_result = np.zeros(self.IMG_ROW, self.IMG_COL, )
+        
 
 if __name__ == '__main__':
     test = FeatureExtraction()
