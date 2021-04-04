@@ -6,11 +6,12 @@ from scipy import signal
 import matplotlib.pyplot as plt
 # np.set_printoptions(threshold=np.inf)
 
-data = scio.loadmat(r"C:\Users\HPuser\Desktop\Finger-Knuckle-Print-recognition-system\31_LDDBP\gaborfilter.mat")
+data = scio.loadmat(r"..\..\31_LDDBP\gaborfilter.mat")
 # print(data["filters"].shape[0])
 result = [i for i in data["filters"]]
-print(len(result))
-
+multiple_code = np.zeros((1, 35, 35), dtype=int)
+multiple_code[0][:][:] = result[1][0][:][:] >= result[0][0][:][:]
+print(multiple_code)
 #   卷积并显示图像
 # gabor = data["filters"][0][0]
 # img = cv.imread(r"../img/sample.jpg", cv.IMREAD_GRAYSCALE)

@@ -40,25 +40,33 @@ class FeatureExtraction:
     def lddbp_coding(self):         # 对图片进行LDDBP特征编码
         """
         conduct the coding process of the image.
-        :return:
+        :return: ndarray
         """
         img = cv.imread(self.IMG_NAME, cv.IMREAD_GRAYSCALE)
         gabor_kernels = self.getGaborKernel()
+
         # the process of convolution
         convolutional_result = []
         code_length = len(gabor_kernels)
         for i in range(code_length):     # 对图像进行卷积操作
             convolutional_result.append(signal.convolve2d(img, gabor_kernels[i][0], mode="same"))
+
         # expand the result box, the length is 14(12+2), as it is a circle code.
         convolutional_result.append(convolutional_result[0])        # result[12] equals result[1]
         convolutional_result.insert(0, convolutional_result[code_length])   # result[0] equals result[11]
 
+        # the process of encode
+        multiple_code = np.zeros((12, img.shape[0], img.shape[1]), dtype=int)
+        for i in range(code_length):
+            multiple_code[i][:][:] = convolutional_result[i+1][0][:][:] > convolutional_result[i][0][:][:]
+
+        
+        return multiple_code
+
 
 if __name__ == '__main__':
-    test = FeatureExtraction()
+    test = FeatureExtraction(r"../img/sample.jpg")
     # gabor_kernels = test.generateGaborKernel()
-    gabor_kernels = test.getGaborKernel()
-    print(gabor_kernels)
-    print(type(gabor_kernels))
-    print(type(gabor_kernels[0]))
-    print(gabor_kernels[0])
+    # gabor_kernels = test.getGaborKernel()
+    code = test.lddbp_coding()
+    print(code)
