@@ -32,10 +32,30 @@ class FeatureExtraction:
                                                    self.PSI, cv.CV_32F))
         return gabor_kernels
 
-    def getGaborKernel(self):        # 读取gabor核
+    @staticmethod
+    def getGaborKernel():        # 读取gabor核
         file = scio.loadmat(r"../../31_LDDBP/gaborfilter.mat")
         kernels = [i for i in file["filters"]]
         return kernels
+
+    def isolateCodes(self, lddbp_code, convolutional_result):
+        """
+        divide codes into several subsequences(sub-LDDBPs) to make only a dominating direction in each subsequence.
+        :return:two ndarray
+        """
+        # do some preparation for the isolation, generate the circle code
+        code_length = len(lddbp_code)
+        temp_code = np.zeros((1, code_length+2), dtype=int)
+        temp_code[1:code_length+1] = lddbp_code[:]
+        temp_code[code_length+2] = lddbp_code[0]
+        temp_code[0] = lddbp_code[code_length]
+
+        dominating_result, subordinate_result = [], []
+        for i in range(code_length):
+            if temp_code[i+1] == 1 and temp_code[i+2] == 0:
+                dominating_result.append([i, convolutional_result[i]])
+
+
 
     def lddbp_coding(self):         # 对图片进行LDDBP特征编码
         """
@@ -48,7 +68,7 @@ class FeatureExtraction:
         # the process of convolution
         convolutional_result = []
         code_length = len(gabor_kernels)
-        for i in range(code_length):     # 对图像进行卷积操作
+        for i in range(code_length):
             convolutional_result.append(signal.convolve2d(img, gabor_kernels[i][0], mode="same"))
 
         # expand the result box, the length is 14(12+2), as it is a circle code.
@@ -60,8 +80,8 @@ class FeatureExtraction:
         for i in range(code_length):
             multiple_code[i][:][:] = convolutional_result[i+1][0][:][:] > convolutional_result[i][0][:][:]
 
-        
-        return multiple_code
+        # isolate codes
+
 
 
 if __name__ == '__main__':
