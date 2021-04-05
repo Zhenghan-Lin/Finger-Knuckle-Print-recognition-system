@@ -49,7 +49,7 @@ class FeatureExtraction:
         temp_code[1:code_length+1] = lddbp_code[:]
         temp_code[code_length+2] = lddbp_code[0]
         temp_code[0] = lddbp_code[code_length]
-
+        #
         dominating_result, subordinate_result = [], []
         for i in range(code_length):
             if temp_code[i+1] == 1 and temp_code[i+2] == 0:
