@@ -43,13 +43,13 @@ class FeatureExtraction:
         divide codes into several subsequences(sub-LDDBPs) to make only a dominating direction in each subsequence.
         :return:two ndarray
         """
-        # do some preparation for the isolation, generate the circle code
+        #   do some preparation for the isolation, generate the circle code
         code_length = len(lddbp_code)
         temp_code = np.zeros((1, code_length+2), dtype=int)
         temp_code[1:code_length+1] = lddbp_code[:]
         temp_code[code_length+2] = lddbp_code[0]
         temp_code[0] = lddbp_code[code_length]
-        #
+        #   isolate the dominating direction and least direction
         dominating_result, subordinate_result = [], []
         for i in range(code_length):
             if temp_code[i+1] == 1 and temp_code[i+2] == 0:
