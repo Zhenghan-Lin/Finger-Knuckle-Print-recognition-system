@@ -4,26 +4,45 @@ import math
 from scipy import io as scio
 from scipy import signal
 import matplotlib.pyplot as plt
-# np.set_printoptions(threshold=np.inf)
+np.set_printoptions(threshold=np.inf)
 
+a = [
+    [[1,2,3],
+     [4,5,6]],
+    [[5,0,8],
+     [1,5,3]]
+]
+result = np.zeros((1, 2, 3), dtype=int)
+for i in range(1):
+    for j in range(1):
+        for z in range(3):
+            result[i][j][z] = a[i+1][j][z] > a[i][j][z]
+# result[0][:][:] = a[1][:][:] > a[0][:][:]
+print(result)
 data = scio.loadmat(r"..\..\31_LDDBP\gaborfilter.mat")
 # print(data["filters"].shape[0])
-result = [i for i in data["filters"]]
-multiple_code = np.zeros((1, 35, 35), dtype=int)
-multiple_code[0][:][:] = result[1][0][:][:] >= result[0][0][:][:]
-print(multiple_code)
+
+# result = [i for i in data["filters"]]
+# multiple_code = np.zeros((1, 35, 35), dtype=int)
+# multiple_code[0][:][:] = result[1][0][:][:] >= result[0][0][:][:]
+# print(multiple_code)
+
+
 #   卷积并显示图像
-# gabor = data["filters"][0][0]
-# img = cv.imread(r"../img/sample.jpg", cv.IMREAD_GRAYSCALE)
+# gabor = data["filters"][6][0]
+# img = cv.imread(r"../img/positive.jpg", cv.IMREAD_GRAYSCALE)
 #
 # result1 = signal.convolve2d(img, gabor, mode="same")
-#
+# print(result1)
+
+# 图像取反
 # for i in range(img.shape[0]):
 #     for j in range(img.shape[1]):
 #         img[i, j] = 255 - img[i, j]
-# # cv.imshow("a", img)
-# # cv.waitKey(0)
 #
+# cv.imshow("a", img)
+# cv.waitKey(0)
+
 # result2 = signal.convolve2d(img, gabor, mode="same")
 #
 # fig, (ax_orig, ax_mag) = plt.subplots(2, 1, figsize=(6, 15))

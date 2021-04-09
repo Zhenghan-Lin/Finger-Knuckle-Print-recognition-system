@@ -3,7 +3,7 @@ import numpy as np
 import math
 from scipy import io as scio
 from scipy import signal
-np.set_printoptions(threshold=np.inf)
+# np.set_printoptions(threshold=np.inf)
 
 
 class FeatureExtraction:
@@ -34,36 +34,74 @@ class FeatureExtraction:
 
     @staticmethod
     def getGaborKernel():        # 读取gabor核
+        """
+        this list is sorted from theta_0 to theta_12.
+        :return: list
+        """
         file = scio.loadmat(r"../../31_LDDBP/gaborfilter.mat")
         kernels = [i for i in file["filters"]]
         return kernels
 
-    def isolateCodes(self, lddbp_code, convolutional_result):
+    def reverseImage(self, img):
         """
-        divide codes into several subsequences(sub-LDDBPs) to make only a dominating direction in each subsequence.
-        :return:two ndarray
+        reverse the image by subtracting the intensity from 255.
+        :return:
+        """
+        for i in range(img.shape[0]):
+            for j in range(img.shape[1]):
+                img[i, j] = 255 - img[i, j]
+        return img
+
+    def getElementApart(self, data, num, data_type, row, col):
+        """
+        get element separately on the third dimension of a list.
+        :return: ndarray
+        """
+        temp = np.zeros((num, 1), dtype=data_type)
+        for i in range(num):
+            temp[i] = data[i][row][col]
+        return temp
+
+    def locateDirection(self, lddbp_code, convolutional_result):
+        """
+        locate the dominating direction and the subordinate direction.
+        sort the directions.
+        :return: descending order of dominating direction array and ascending order of subordinate direction array
         """
         #   do some preparation for the isolation, generate the circle code
         code_length = len(lddbp_code)
-        temp_code = np.zeros((1, code_length+2), dtype=int)
+        temp_code = np.zeros((code_length+2, 1), dtype=int)
         temp_code[1:code_length+1] = lddbp_code[:]
-        temp_code[code_length+2] = lddbp_code[0]
-        temp_code[0] = lddbp_code[code_length]
+        temp_code[code_length+1] = lddbp_code[0]
+        temp_code[0] = lddbp_code[code_length-1]
+        temp_result = convolutional_result[1:code_length+1]
+        print(temp_result)
+        print(lddbp_code)
+        # print(convolutional_result)
+
         #   isolate the dominating direction and least direction
         dominating_result, subordinate_result = [], []
         for i in range(code_length):
-            if temp_code[i+1] == 1 and temp_code[i+2] == 0:
-                dominating_result.append([i, convolutional_result[i]])
+            if temp_code[i + 1] == 1 and temp_code[i + 2] == 0:     # locate the dominating direction
+                dominating_result.append([i, temp_result[i]])
+            if temp_code[i + 1] == 0 and temp_code[i + 2] == 1:
+                subordinate_result.append([i, temp_result[i]])
 
-
+        return dominating_result, subordinate_result
 
     def lddbp_coding(self):         # 对图片进行LDDBP特征编码
         """
         conduct the coding process of the image.
+        the sequence of code is reversed, which means code[0] equals the result convoluted by theta_0 Gabor kernel.
+        it can therefore be argued that the dominating direction is depends on the sequence of '10'.
+        in other words, the subordinate direction relies on the sequence of '01'.
         :return: ndarray
         """
         img = cv.imread(self.IMG_NAME, cv.IMREAD_GRAYSCALE)
         gabor_kernels = self.getGaborKernel()
+
+        # reverse the image
+        img = self.reverseImage(img)
 
         # the process of convolution
         convolutional_result = []
@@ -73,19 +111,35 @@ class FeatureExtraction:
 
         # expand the result box, the length is 14(12+2), as it is a circle code.
         convolutional_result.append(convolutional_result[0])        # result[12] equals result[1]
-        convolutional_result.insert(0, convolutional_result[code_length])   # result[0] equals result[11]
+        convolutional_result.insert(0, convolutional_result[code_length-1])   # result[0] equals result[11]
 
         # the process of encode
         multiple_code = np.zeros((12, img.shape[0], img.shape[1]), dtype=int)
         for i in range(code_length):
             multiple_code[i][:][:] = convolutional_result[i+1][0][:][:] > convolutional_result[i][0][:][:]
 
-        # isolate codes
+        # do some preparation for the process of locating direction.
+        temp_code = np.zeros((code_length, 1), dtype=int)
+        temp_result = np.zeros((code_length + 2, 1), dtype=float)
 
+        temp_code = self.getElementApart(multiple_code, code_length, int, 50, 50)
+        temp_result = self.getElementApart(convolutional_result, code_length + 2, float, 50, 50)
+        dominating_result, subordinate_result = self.locateDirection(temp_code, temp_result)
+
+        print(dominating_result)
+        print(subordinate_result)
+
+        return 0
+        # locate direction
+        # for i in range(self.IMG_ROW):
+        #     for j in range(self.IMG_COL):
+        #         temp_code = self.getElementApart(multiple_code, code_length, int, i, j)
+        #         temp_result = self.getElementApart(convolutional_result, code_length+2, float, i, j)
+        #         dominating_result, subordinate_result = self.locateDirection(temp_code, temp_result)
 
 
 if __name__ == '__main__':
-    test = FeatureExtraction(r"../img/sample.jpg")
+    test = FeatureExtraction(r"../img/negative.jpg")
     # gabor_kernels = test.generateGaborKernel()
     # gabor_kernels = test.getGaborKernel()
     code = test.lddbp_coding()
