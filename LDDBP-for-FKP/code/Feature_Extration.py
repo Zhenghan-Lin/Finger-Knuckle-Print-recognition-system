@@ -74,22 +74,53 @@ class FeatureExtraction:
         temp_code[1:code_length+1] = lddbp_code[:]
         temp_code[code_length+1] = lddbp_code[0]
         temp_code[0] = lddbp_code[code_length-1]
-        temp_result = convolutional_result[1:code_length+1]
-        print(temp_result)
-        print(lddbp_code)
+
+        # print(lddbp_code)
         # print(convolutional_result)
 
         #   isolate the dominating direction and least direction
         dominating_result, subordinate_result = [], []
         for i in range(code_length):
             if temp_code[i + 1] == 1 and temp_code[i + 2] == 0:     # locate the dominating direction
-                dominating_result.append([i, temp_result[i]])
+                dominating_result.append([i, convolutional_result[i]])
             if temp_code[i + 1] == 0 and temp_code[i + 2] == 1:
-                subordinate_result.append([i, temp_result[i]])
+                subordinate_result.append([i, convolutional_result[i]])
+        #   sort the lists
+        if len(dominating_result) > 1:
+            dominating_result.sort(key=lambda list: list[1], reverse=True)
+            subordinate_result.sort(key=lambda list: list[1], reverse=False)
 
         return dominating_result, subordinate_result
 
-    def lddbp_coding(self):         # 对图片进行LDDBP特征编码
+    def encode(self, convolutional_result, code_length):
+        """
+        compare the convolutional results and encode the lddbp codes.
+        :return: ndarray
+        """
+        multiple_code = np.zeros((12, self.IMG_ROW, self.IMG_COL), dtype=int)
+        for i in range(code_length):
+            for j in range(self.IMG_ROW):
+                for z in range(self.IMG_COL):
+                    multiple_code[i][j][z] = convolutional_result[i+1][j][z] > convolutional_result[i][j][z]
+        return multiple_code
+
+    def LDDPEncode(self, index, convolutional_result):
+        """
+        utilize the index of direction and the contiguous responses to
+        calculate LDDP(local discriminate direction pattern)
+        :param index: the index that indicates either the dominating direction
+                      or the subordinate direction,
+        :param convolutional_result: the contiguous responses to the index
+        :return: int ranging from 0 to 264
+        """
+        i = index + 1
+        if convolutional_result[i+1] > convolutional_result[i-1]:
+            lddp = index*2
+        else:
+            lddp = index*2-1
+        return lddp
+
+    def lddbpCoding(self):
         """
         conduct the coding process of the image.
         the sequence of code is reversed, which means code[0] equals the result convoluted by theta_0 Gabor kernel.
@@ -114,33 +145,44 @@ class FeatureExtraction:
         convolutional_result.insert(0, convolutional_result[code_length-1])   # result[0] equals result[11]
 
         # the process of encode
-        multiple_code = np.zeros((12, img.shape[0], img.shape[1]), dtype=int)
-        for i in range(code_length):
-            multiple_code[i][:][:] = convolutional_result[i+1][0][:][:] > convolutional_result[i][0][:][:]
+        multiple_code = self.encode(convolutional_result, code_length)
 
-        # do some preparation for the process of locating direction.
-        temp_code = np.zeros((code_length, 1), dtype=int)
-        temp_result = np.zeros((code_length + 2, 1), dtype=float)
+        # generate Lm and Ls
+        Lm = np.zeros((self.IMG_ROW, self.IMG_COL), dtype=int)
+        Ls = np.zeros((self.IMG_ROW, self.IMG_COL), dtype=int)
+        for i in range(self.IMG_ROW):
+            for j in range(self.IMG_COL):
 
-        temp_code = self.getElementApart(multiple_code, code_length, int, 50, 50)
-        temp_result = self.getElementApart(convolutional_result, code_length + 2, float, 50, 50)
-        dominating_result, subordinate_result = self.locateDirection(temp_code, temp_result)
+                # get codes and convolutional results at (i,j)
+                temp_code = self.getElementApart(multiple_code, code_length, int, i, j)
+                temp_result = self.getElementApart(convolutional_result, code_length + 2, float, i, j)
 
-        print(dominating_result)
-        print(subordinate_result)
+                # the process of locating direction
+                dominating_result, subordinate_result = self.locateDirection(temp_code, temp_result[1:code_length+1])
 
+                # if there is no dominating direction, then pass on.
+                # else generate Lm and Ls
+                direction_num = len(dominating_result)
+                if direction_num == 0:
+                    continue
+                else:
+                    dominating_index1 = dominating_result[0][0]
+                    intermediate_calculation = self.LDDPEncode(dominating_index1, temp_result)
+                    subordinate_index1 = subordinate_result[0][0]
+                    # Lm[i][j] = (intermediate_calculation - 1) * 11 +
+
+        # temp_code = self.getElementApart(multiple_code, code_length, int, 66, 66)
+        # temp_result = self.getElementApart(convolutional_result, code_length+2, float, 66, 66)
+        # dominating_result, subordinate_result = self.locateDirection(temp_code, temp_result[1:code_length+1])
+        # print(dominating_result)
+        # print(dominating_result[0])
+        # print(type(dominating_result[0][1]))
         return 0
-        # locate direction
-        # for i in range(self.IMG_ROW):
-        #     for j in range(self.IMG_COL):
-        #         temp_code = self.getElementApart(multiple_code, code_length, int, i, j)
-        #         temp_result = self.getElementApart(convolutional_result, code_length+2, float, i, j)
-        #         dominating_result, subordinate_result = self.locateDirection(temp_code, temp_result)
 
 
 if __name__ == '__main__':
     test = FeatureExtraction(r"../img/negative.jpg")
     # gabor_kernels = test.generateGaborKernel()
     # gabor_kernels = test.getGaborKernel()
-    code = test.lddbp_coding()
+    code = test.lddbpCoding()
     print(code)

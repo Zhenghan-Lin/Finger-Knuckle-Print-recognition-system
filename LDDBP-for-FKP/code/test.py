@@ -6,27 +6,10 @@ from scipy import signal
 import matplotlib.pyplot as plt
 np.set_printoptions(threshold=np.inf)
 
-a = [
-    [[1,2,3],
-     [4,5,6]],
-    [[5,0,8],
-     [1,5,3]]
-]
-result = np.zeros((1, 2, 3), dtype=int)
-for i in range(1):
-    for j in range(1):
-        for z in range(3):
-            result[i][j][z] = a[i+1][j][z] > a[i][j][z]
-# result[0][:][:] = a[1][:][:] > a[0][:][:]
-print(result)
 data = scio.loadmat(r"..\..\31_LDDBP\gaborfilter.mat")
 # print(data["filters"].shape[0])
 
 # result = [i for i in data["filters"]]
-# multiple_code = np.zeros((1, 35, 35), dtype=int)
-# multiple_code[0][:][:] = result[1][0][:][:] >= result[0][0][:][:]
-# print(multiple_code)
-
 
 #   卷积并显示图像
 # gabor = data["filters"][6][0]
