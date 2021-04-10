@@ -165,11 +165,23 @@ class FeatureExtraction:
                 direction_num = len(dominating_result)
                 if direction_num == 0:
                     continue
-                else:
+                else:   # calculate Lm
                     dominating_index1 = dominating_result[0][0]
                     intermediate_calculation = self.LDDPEncode(dominating_index1, temp_result)
                     subordinate_index1 = subordinate_result[0][0]
-                    # Lm[i][j] = (intermediate_calculation - 1) * 11 +
+                    Lm[i][j] = (
+                            (intermediate_calculation - 1) * (self.THETA_NUM - 1) +
+                                np.mod(self.THETA_NUM + subordinate_index1 - dominating_index1, self.THETA_NUM)
+                    )
+                    # calculate Ls
+                    if direction_num >= 2:
+                        dominating_index2 = dominating_result[1][0]
+                        intermediate_calculation1 = self.LDDPEncode(dominating_index2, temp_result)
+                        subordinate_index2 = subordinate_result[1][0]
+                        Ls[i][j] = (
+                            (intermediate_calculation1 - 1) * (self.THETA_NUM - 1) +
+                                np.mod(subordinate_index2 + self.THETA_NUM - subordinate_index2, self.THETA_NUM)
+                        )
 
         # temp_code = self.getElementApart(multiple_code, code_length, int, 66, 66)
         # temp_result = self.getElementApart(convolutional_result, code_length+2, float, 66, 66)
@@ -177,7 +189,7 @@ class FeatureExtraction:
         # print(dominating_result)
         # print(dominating_result[0])
         # print(type(dominating_result[0][1]))
-        return 0
+        return Lm, Ls
 
 
 if __name__ == '__main__':
