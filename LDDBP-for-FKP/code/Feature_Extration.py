@@ -118,9 +118,10 @@ class FeatureExtraction:
             lddp = index*2
         else:
             lddp = index*2-1
+
         return lddp
 
-    def lddbpCoding(self):
+    def LDDBPCoding(self):
         """
         conduct the coding process of the image.
         the sequence of code is reversed, which means code[0] equals the result convoluted by theta_0 Gabor kernel.
@@ -191,6 +192,7 @@ class FeatureExtraction:
         # print(type(dominating_result[0][1]))
         return Lm, Ls
 
+    def LDDBP(self):
 
 if __name__ == '__main__':
     test = FeatureExtraction(r"../img/negative.jpg")
