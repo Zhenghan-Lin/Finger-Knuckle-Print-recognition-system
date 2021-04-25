@@ -195,18 +195,20 @@ class FeatureExtraction:
         """
         # get Lm & Ls maps
         Lm, Ls = self.generateLDDBPMaps()
+
         # initialize some parameters
         total_of_block = self.BLOCK_SIZE*self.BLOCK_SIZE
         block_num_for_row = math.floor(self.IMG_ROW / self.BLOCK_SIZE)
         block_num_for_col = math.floor(self.IMG_COL / self.BLOCK_SIZE)
         bin_box = []
-        for i in range(264):
+        for i in range(265):
             bin_box.append(i+1)
 
         # calculate the histogram of Lm and Ls
         Lm_descriptor, Ls_descriptor = [], []
         for i in range(block_num_for_row):
             for j in range(block_num_for_col):
+                # initialize the index for start and end
                 row_start = i * self.BLOCK_SIZE
                 row_end = (i+1) * self.BLOCK_SIZE
 
@@ -219,19 +221,36 @@ class FeatureExtraction:
                 if col_end > self.IMG_COL:
                     col_end = self.IMG_COL
 
+                # calculate Lm map
                 part_of_Lm = []
                 for r in range(row_start, row_end):
                     for c in range(col_start, col_end):
                         part_of_Lm.append(Lm[r][c])
-                hist, _ = np.histogram(part_of_Lm, bins=bin_box, density=True)
+                hist_Lm, _ = np.histogram(part_of_Lm, bins=bin_box, density=True)
+                Lm_descriptor = np.append(Lm_descriptor, hist_Lm)
 
-        a = 0
-        return 0
+                # calculate Ls map
+                part_of_Ls = []
+                for r in range(row_start, row_end):
+                    for c in range(col_start, col_end):
+                        part_of_Ls.append(Ls[r][c])
+                hist_Ls, _ = np.histogram(part_of_Ls, bins=bin_box, density=True)
+                Ls_descriptor = np.append(Ls_descriptor, hist_Ls)
+
+        # concatenate Lm descriptor and Ls descriptor
+        LDDBP_code = np.append(Lm_descriptor, Ls_descriptor)
+
+        return LDDBP_code
+
+    def match(self):
+        """
+        the match method.
+        :return:
+        """
+
 
 
 if __name__ == '__main__':
     test = FeatureExtraction(r"../img/negative.jpg")
-    # gabor_kernels = test.generateGaborKernel()
-    # gabor_kernels = test.getGaborKernel()
     code = test.LDDBP()
     print(code)

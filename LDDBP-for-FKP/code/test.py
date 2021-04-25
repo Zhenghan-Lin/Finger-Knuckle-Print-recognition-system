@@ -38,19 +38,17 @@ np.set_printoptions(threshold=np.inf)
 # ax_mag.set_axis_off()
 # # plt.savefig(r"../img/convelutional_result.jpg")
 # plt.show()
-a = []
-b = [1,2,3,4,5,6]
-for i in range(3):
-    a = a + b
-print(a)
-# b = []
-# for i in range(50):
-#     b.append(i+1)
-# print(b)
-# a = [0,0,1,2,3,3,5,5,6,1,23,4,1,2,5,1,1,22,5,2,35,1,23,5,50,5,6,14,5,2,36,23,6,21,6,16,16,16,17,48,47]
-# print(len(a))
-# hist, _ = np.histogram(a, bins=b, density=True)
-# print(hist)
-# print(_)
-# print(hist.sum())
+
+
+b = []
+for i in range(50):
+    b.append(i+1)
+a = [0,0,1,2,3,3,5,5,6,1,23,4,1,2,5,1,1,22,5,2,35,1,23,5,50,5,6,14,5,2,36,23,6,21,6,16,16,16,17,48,47]
+hist, _ = np.histogram(a, bins=b, density=True)
+print(hist)
+d = np.append(hist, hist.T)
+# hist = hist.reshape((1, -1))
+print(d)
+
+
 
