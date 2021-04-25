@@ -20,8 +20,9 @@ class FeatureExtraction:
                       )
         self.IMG_ROW = 110          # ROI图像的高，即行数
         self.IMG_COL = 220          # ROI图像的宽，即列数
-        self.ROW_PLUS_COL = self.IMG_ROW * self.IMG_COL
-        self.IMG_NAME = name
+        self.ROW_Multiply_COL = self.IMG_ROW * self.IMG_COL     # 行数*列数
+        self.IMG_NAME = name        # Img的路径
+        self.BLOCK_SIZE = 16        # 分块大小
         # print(self.SIGMA)
 
     def generateGaborKernel(self):      # 计算gabor核
@@ -66,6 +67,7 @@ class FeatureExtraction:
         """
         locate the dominating direction and the subordinate direction.
         sort the directions.
+        PS: Actually, the range of index should have been between 1-12, while i replace it by the index of array (0-11).
         :return: descending order of dominating direction array and ascending order of subordinate direction array
         """
         #   do some preparation for the isolation, generate the circle code
@@ -115,13 +117,13 @@ class FeatureExtraction:
         """
         i = index + 1
         if convolutional_result[i+1] > convolutional_result[i-1]:
-            lddp = index*2
+            lddp = i*2
         else:
-            lddp = index*2-1
+            lddp = i*2-1
 
         return lddp
 
-    def LDDBPCoding(self):
+    def generateLDDBPMaps(self):
         """
         conduct the coding process of the image.
         the sequence of code is reversed, which means code[0] equals the result convoluted by theta_0 Gabor kernel.
@@ -184,19 +186,52 @@ class FeatureExtraction:
                                 np.mod(subordinate_index2 + self.THETA_NUM - subordinate_index2, self.THETA_NUM)
                         )
 
-        # temp_code = self.getElementApart(multiple_code, code_length, int, 66, 66)
-        # temp_result = self.getElementApart(convolutional_result, code_length+2, float, 66, 66)
-        # dominating_result, subordinate_result = self.locateDirection(temp_code, temp_result[1:code_length+1])
-        # print(dominating_result)
-        # print(dominating_result[0])
-        # print(type(dominating_result[0][1]))
         return Lm, Ls
 
     def LDDBP(self):
+        """
+        generate LDDBP-based descriptor.
+        :return:
+        """
+        # get Lm & Ls maps
+        Lm, Ls = self.generateLDDBPMaps()
+        # initialize some parameters
+        total_of_block = self.BLOCK_SIZE*self.BLOCK_SIZE
+        block_num_for_row = math.floor(self.IMG_ROW / self.BLOCK_SIZE)
+        block_num_for_col = math.floor(self.IMG_COL / self.BLOCK_SIZE)
+        bin_box = []
+        for i in range(264):
+            bin_box.append(i+1)
+
+        # calculate the histogram of Lm and Ls
+        Lm_descriptor, Ls_descriptor = [], []
+        for i in range(block_num_for_row):
+            for j in range(block_num_for_col):
+                row_start = i * self.BLOCK_SIZE
+                row_end = (i+1) * self.BLOCK_SIZE
+
+                if row_end > self.IMG_ROW:
+                    row_end = self.IMG_ROW
+
+                col_start = j * self.BLOCK_SIZE
+                col_end = (j+1) * self.BLOCK_SIZE
+
+                if col_end > self.IMG_COL:
+                    col_end = self.IMG_COL
+
+                part_of_Lm = []
+                for r in range(row_start, row_end):
+                    for c in range(col_start, col_end):
+                        part_of_Lm.append(Lm[r][c])
+                hist, _ = np.histogram(part_of_Lm, bins=bin_box, density=True)
+
+        a = 0
+        return 0
+
 
 if __name__ == '__main__':
     test = FeatureExtraction(r"../img/negative.jpg")
     # gabor_kernels = test.generateGaborKernel()
     # gabor_kernels = test.getGaborKernel()
-    code = test.lddbpCoding()
+    code = test.LDDBP()
     print(code)
