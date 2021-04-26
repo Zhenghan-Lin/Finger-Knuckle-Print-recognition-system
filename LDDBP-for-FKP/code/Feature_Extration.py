@@ -23,6 +23,7 @@ class FeatureExtraction:
         self.ROW_Multiply_COL = self.IMG_ROW * self.IMG_COL     # 行数*列数
         self.IMG_NAME = name        # Img的路径
         self.BLOCK_SIZE = 16        # 分块大小
+        self.BLOCK_NUM = math.floor(self.IMG_ROW / self.BLOCK_SIZE) * math.floor(self.IMG_COL / self.BLOCK_SIZE)
         # print(self.SIGMA)
 
     def generateGaborKernel(self):      # 计算gabor核
@@ -242,15 +243,34 @@ class FeatureExtraction:
 
         return LDDBP_code
 
-    def match(self):
+    def match(self, sample_P, sample_Q):
         """
-        the match method.
+        the match method based on Chi-square distance.
         :return:
         """
+        # calculate the square difference between img P and Q.
+        difference = np.subtract(sample_P, sample_Q)
+        square_difference = np.square(difference)
 
+        # calculate the sum of P and Q
+        sum = np.add(sample_P, sample_Q)
+
+        # calculate the quotient. significantly, the denominator cannot be 0.
+        index_of_nonzero = np.nonzero(sum)
+        quotient = 0
+        for i in range(len(index_of_nonzero[0])):
+            index = index_of_nonzero[0][i]
+            quotient += np.divide(square_difference[index], sum[index])
+
+        score = quotient / self.BLOCK_NUM
+        return score
 
 
 if __name__ == '__main__':
+    sample = FeatureExtraction(r"../img/sample.jpg")
     test = FeatureExtraction(r"../img/negative.jpg")
-    code = test.LDDBP()
-    print(code)
+    test1 = FeatureExtraction(r"../img/positive.jpg")
+    code = sample.LDDBP()
+    code1 = test.LDDBP()
+    code2 = test1.LDDBP()
+    score_ = sample.match(code, code1)
