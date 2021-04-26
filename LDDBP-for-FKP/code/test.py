@@ -4,11 +4,9 @@ import math
 from scipy import io as scio
 from scipy import signal
 import matplotlib.pyplot as plt
-np.set_printoptions(threshold=np.inf)
+# np.set_printoptions(threshold=np.inf)
 
-# data = scio.loadmat(r"..\..\31_LDDBP\gaborfilter.mat")
-# print(data["filters"].shape[0])
-
+data = scio.loadmat(r"..\..\31_LDDBP\gaborfilter.mat")
 # result = [i for i in data["filters"]]
 
 #   卷积并显示图像
@@ -38,19 +36,6 @@ np.set_printoptions(threshold=np.inf)
 # ax_mag.set_axis_off()
 # # plt.savefig(r"../img/convelutional_result.jpg")
 # plt.show()
-
-a = np.eye(6, dtype=int)
-b = np.ones((6,6), dtype=int)
-c = a-b
-d = c*c
-# print(a)
-# print(b)
-# print(c)
-print(d)
-f = np.nonzero(d)
-print(f)
-
-print(g)
 
 
 
