@@ -59,17 +59,28 @@ class Evaluation:
             picture_number = len(self.DESCRIPTOR_LIST)
 
         # evaluation start!
-        for P in range(picture_number):
-            for Q in range(P+1, picture_number):
+        for P_index in range(picture_number):
+            for Q_index in range(P_index+1, picture_number):
                 # calculate the group of P, within which is the positive sample.
-                range_start = P // 12 * 12
+                range_start = P_index // 12 * 12
                 range_end = range_start + 11
+
                 # calculate the score
-                score = self.match(P, Q)
-                # Q is one of the group P and score is less than threshold, then it is TP
-                if score <= self.THRESHOLD and range_start <= Q <= range_end:
+                score = self.match(self.DESCRIPTOR_LIST[P_index], self.DESCRIPTOR_LIST[Q_index])
 
-
+                # whether Q belongs to group P
+                if range_start <= Q_index <= range_end:
+                    # should be positive
+                    if score <= self.THRESHOLD:     # classified as positive
+                        self.TP += 1
+                    else:                           # classified as negative
+                        self.FP += 1
+                else:
+                    # should be negative
+                    if score <= self.THRESHOLD:     # classified as positive
+                        self.FN += 1
+                    else:                           # classified as negative
+                        self.TN += 1
 
 
 if __name__ == '__main__':

@@ -39,7 +39,8 @@ import matplotlib.pyplot as plt
 
 a = 1
 b = 5
-if a <= 3 <= b:
+c = 6
+if 1 <= c <= 5:
     print('5')
 else:
     print('7')
