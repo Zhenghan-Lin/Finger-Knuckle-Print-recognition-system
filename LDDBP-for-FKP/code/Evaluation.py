@@ -19,7 +19,7 @@ class Evaluation:
         self.BLOCK_NUM = math.floor(self.IMG_ROW / self.BLOCK_SIZE) * \
                          math.floor(self.IMG_COL / self.BLOCK_SIZE)         # 分块总数
         self.FLAG_FOR_MINIBATCH = True      # True, use the mini batch, vice versa.
-        self.threshold = threshold
+        self.THRESHOLD = threshold
         self.TP, self.TN, self.FP, self.FN = 0, 0, 0, 0
         self.G_TOTAL, self.I_TOTAL = 0, 0
         print("Start Loading descriptor list!")
@@ -57,6 +57,19 @@ class Evaluation:
             picture_number = 48
         else:                           # use universal set for evaluation.
             picture_number = len(self.DESCRIPTOR_LIST)
+
+        # evaluation start!
+        for P in range(picture_number):
+            for Q in range(P+1, picture_number):
+                # calculate the group of P, within which is the positive sample.
+                range_start = P // 12 * 12
+                range_end = range_start + 11
+                # calculate the score
+                score = self.match(P, Q)
+                # Q is one of the group P and score is less than threshold, then it is TP
+                if score <= self.THRESHOLD and range_start <= Q <= range_end:
+
+
 
 
 if __name__ == '__main__':

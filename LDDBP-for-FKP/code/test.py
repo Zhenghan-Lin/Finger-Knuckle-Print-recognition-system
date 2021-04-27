@@ -37,10 +37,10 @@ import matplotlib.pyplot as plt
 # # plt.savefig(r"../img/convelutional_result.jpg")
 # plt.show()
 
-data = np.load(r'descriptor_list/minibatch_descriptor_.npy')
-a = np.zeros(100, dtype=int)
-# for i in range(100):
-#     a[i] = i
-print(a)
-np.savetxt(r'test.txt', a)
+a = 1
+b = 5
+if a <= 3 <= b:
+    print('5')
+else:
+    print('7')
 
