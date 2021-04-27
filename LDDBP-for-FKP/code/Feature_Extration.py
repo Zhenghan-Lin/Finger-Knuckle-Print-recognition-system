@@ -3,13 +3,16 @@ import numpy as np
 import math
 from scipy import io as scio
 from scipy import signal
+import glob
+import json
 # np.set_printoptions(threshold=np.inf)
 
 
 class FeatureExtraction:
     def __init__(self, name=""):
         self.GABOR_PATH = r"./gabor_data/10_0318.npy"    # Gabor文件的路径
-        self.FLAG_FOR_GABOR = True      # TRUE,采取论文中的gabor核;FALSE,采用自己生成的gabor核
+        # self.GABOR_PATH = r"./gabor_data/9_9932.npy"    # Gabor文件的路径
+        self.FLAG_FOR_GABOR = False      # TRUE,采取论文中的Gabor核;FALSE,采用自己生成的gabor核
         self.LAMBDA = 9.9932            # 波长
         # self.LAMBDA = 10.0318         # 波长
 
@@ -27,6 +30,9 @@ class FeatureExtraction:
         self.BLOCK_SIZE = 16            # 分块大小
         self.BLOCK_NUM = math.floor(self.IMG_ROW / self.BLOCK_SIZE) * math.floor(self.IMG_COL / self.BLOCK_SIZE)
         # print(self.SIGMA)
+
+    def reset(self, name):
+        self.IMG_NAME = name
 
     def generateGaborKernel(self):      # 计算gabor核
         gabor_kernels = []
@@ -213,7 +219,7 @@ class FeatureExtraction:
     def LDDBP(self):
         """
         generate LDDBP-based descriptor.
-        :return:
+        :return: LDDBP-code ndarray
         """
         # get Lm & Ls maps
         Lm, Ls = self.generateLDDBPMaps()
@@ -288,41 +294,36 @@ class FeatureExtraction:
 
 
 if __name__ == '__main__':
-    sample = FeatureExtraction(r"../img/sample.jpg")
-    gabor1 = sample.generateGaborKernel()
-    gabor2 = sample.getGaborKernel()
+    # sample = FeatureExtraction(r"../img/sample.jpg")
+    # code = sample.LDDBP()
 
     # np.save(r"./gabor_data/10_0318", gabor1)
 
-    test_negative1 = FeatureExtraction(r"../img/negative1.jpg")
-    test_negative2 = FeatureExtraction(r"../img/negative2.jpg")
-    test_negative3 = FeatureExtraction(r"../img/negative3.jpg")
+    """Save the descriptor list"""
+    # a = FeatureExtraction()
+    # count = 1
+    # descriptor_list = []
+    # files = glob.glob(r"../mini-batch/*/*.jpg")
+    # for i in files:
+    #     a.reset(i)
+    #     descriptor = a.LDDBP()
+    #     descriptor.tolist()
+    #     descriptor_list.append(descriptor)
+    #     print("==============No.%d is finished!==============" % count)
+    #     count += 1
+    # np.save(r'./descriptor_list/minibatch_descriptor_9_9932', descriptor_list)
+    # print("=====================All finished!=====================")
 
-    test_positive1 = FeatureExtraction(r"../img/positive1.jpg")
-    test_positive2 = FeatureExtraction(r"../img/positive2.jpg")
-    test_positive3 = FeatureExtraction(r"../img/positive3.jpg")
-
-    code = sample.LDDBP()
-
-    code_negative1 = test_negative1.LDDBP()
-    code_negative2 = test_negative2.LDDBP()
-    code_negative3 = test_negative3.LDDBP()
-
-    code_positive1 = test_positive1.LDDBP()
-    code_positive2 = test_positive2.LDDBP()
-    code_positive3 = test_positive3.LDDBP()
-
-    score_positive1 = sample.match(code, code_positive1)
-    score_positive2 = sample.match(code, code_positive2)
-    score_positive3 = sample.match(code, code_positive3)
-
-    score_negative1 = sample.match(code, code_negative1)
-    score_negative2 = sample.match(code, code_negative2)
-    score_negative3 = sample.match(code, code_negative3)
-
-    print(score_positive1)
-    print(score_positive2)
-    print(score_positive3)
-    print(score_negative1)
-    print(score_negative2)
-    print(score_negative3)
+    """confirm the threshold of classification"""
+    sample = FeatureExtraction(r'../img/sample.jpg')
+    descriptor = sample.LDDBP()
+    # data = np.load(r'./descriptor_list/minibatch_descriptor_.npy')
+    data = np.load(r'./descriptor_list/minibatch_descriptor_10_0318.npy')
+    score_list = np.zeros(len(data))
+    for i in range(len(data)):
+        score = sample.match(descriptor, data[i])
+        print(score)
+        score_list[i] = score
+        if i == 11:
+            print('=====================================')
+    np.savetxt(r'./scores/scores_10_0318.txt', score_list, fmt='%f')

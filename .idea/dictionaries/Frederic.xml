@@ -2,7 +2,9 @@
   <dictionary name="Frederic">
     <words>
       <w>convolutional</w>
+      <w>minibatch</w>
       <w>ndarray</w>
+      <w>printoptions</w>
     </words>
   </dictionary>
 </component>
