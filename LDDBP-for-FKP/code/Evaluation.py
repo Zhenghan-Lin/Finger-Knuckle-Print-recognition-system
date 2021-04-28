@@ -118,6 +118,7 @@ class Evaluation:
 
 
 if __name__ == '__main__':
+    # todo 测试最佳分类阈值
     # tester = Evaluation(r'./descriptor_list/minibatch_descriptor_.npy', 1.400)
     tester = Evaluation(r'./descriptor_list/minibatch_descriptor_9_9932.npy', 1.380)
     # tester = Evaluation(r'./descriptor_list/minibatch_descriptor_10_0318.npy', 1.400)

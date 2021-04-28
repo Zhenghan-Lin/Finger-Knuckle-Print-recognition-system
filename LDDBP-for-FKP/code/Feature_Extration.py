@@ -301,6 +301,7 @@ if __name__ == '__main__':
     # np.save(r"./gabor_data/10_0318", gabor1)
 
     """Save the descriptor list"""
+    # todo 保存9_9932编码
     # a = FeatureExtraction()
     # count = 1
     # descriptor_list = []
