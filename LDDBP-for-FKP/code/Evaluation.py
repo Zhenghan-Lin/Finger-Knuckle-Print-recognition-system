@@ -19,9 +19,10 @@ class Evaluation:
         self.BLOCK_NUM = math.floor(self.IMG_ROW / self.BLOCK_SIZE) * \
                          math.floor(self.IMG_COL / self.BLOCK_SIZE)         # 分块总数
         self.FLAG_FOR_MINIBATCH = True      # True, use the mini batch, vice versa.
-        self.THRESHOLD = threshold
-        self.TP, self.TN, self.FP, self.FN = 0, 0, 0, 0
-        self.G_TOTAL, self.I_TOTAL = 0, 0
+        self.THRESHOLD = threshold          # threshold for classification
+        self.TP, self.TN, self.FP, self.FN = 0, 0, 0, 0     # sum of TP/TN/FP/FN
+        self.FP_LIST, self.FN_LIST = [], []                 # storage of mis-classification
+        self.GENUINE, self.IMPOSTER = [], []                # storage of each category
         print("Start Loading descriptor list!")
         self.DESCRIPTOR_LIST = np.load(filepath)
         print("loading process done!")
@@ -51,7 +52,7 @@ class Evaluation:
     def evaluate(self):
         """
         Evaluation procedure.
-        :return:
+        :return: none
         """
         if self.FLAG_FOR_MINIBATCH:     # use mini batch for evaluation.
             picture_number = 48
@@ -59,7 +60,8 @@ class Evaluation:
             picture_number = len(self.DESCRIPTOR_LIST)
 
         # evaluation start!
-        for P_index in range(picture_number):
+        # todo 使用tqdm显示进度条
+        for P_index in range(picture_number-1):
             for Q_index in range(P_index+1, picture_number):
                 # calculate the group of P, within which is the positive sample.
                 range_start = P_index // 12 * 12
@@ -69,18 +71,31 @@ class Evaluation:
                 score = self.match(self.DESCRIPTOR_LIST[P_index], self.DESCRIPTOR_LIST[Q_index])
 
                 # whether Q belongs to group P
+                # TODO 统计错误数据，以此确定相似度阈值
+                # TODO 统计Genuine/Imposter各个分数的数量
                 if range_start <= Q_index <= range_end:
-                    # should be positive
+                    # Genuine
+                    self.GENUINE.append((P_index, Q_index, score, self.THRESHOLD))
                     if score <= self.THRESHOLD:     # classified as positive
                         self.TP += 1
                     else:                           # classified as negative
                         self.FP += 1
+                        self.FP_LIST.append((P_index, Q_index, score, self.THRESHOLD))
                 else:
-                    # should be negative
+                    # Imposter
+                    self.IMPOSTER.append((P_index, Q_index, score, self.THRESHOLD))
                     if score <= self.THRESHOLD:     # classified as positive
                         self.FN += 1
+                        self.FN_LIST.append((P_index, Q_index, score, self.THRESHOLD))
                     else:                           # classified as negative
                         self.TN += 1
+        # save data
+        np.savetxt(r'./Genuine/Genuine_.txt', self.GENUINE, delimiter='\t', fmt='%f')
+        np.savetxt(r'./Imposter/Imposter_.txt', self.IMPOSTER, delimiter='\t', fmt='%f')
+        np.savetxt(r'./FP_list/FP_list_.txt', self.FP_LIST, delimiter='\t', fmt='%f')
+        np.savetxt(r'./FN_list/FN_list_.txt', self.FN_LIST, delimiter='\t', fmt='%f')
+        print('saving process finished!')
+
 
 
 if __name__ == '__main__':

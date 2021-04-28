@@ -37,11 +37,16 @@ import matplotlib.pyplot as plt
 # # plt.savefig(r"../img/convelutional_result.jpg")
 # plt.show()
 
-a = 1
-b = 5
-c = 6
-if 1 <= c <= 5:
-    print('5')
-else:
-    print('7')
+
+import pandas as pd
+import numpy as np
+import time
+from tqdm import tqdm
+
+alist = list('letters123456789')
+bar = tqdm(alist)
+for letter in bar:
+    time.sleep(0.5)
+    bar.set_description(f"Now get {letter}")
+
 
