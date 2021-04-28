@@ -41,12 +41,32 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import time
-from tqdm import tqdm
+import sys
+from tqdm import tqdm, trange
 
-alist = list('letters123456789')
-bar = tqdm(alist)
-for letter in bar:
-    time.sleep(0.5)
-    bar.set_description(f"Now get {letter}")
+
+def test(total):
+    with tqdm(total=total, leave=False, unit='img') as pbar2:
+        for Q_index in range(total):
+            pbar2.set_description('No.%d is processed!' % Q_index)
+            time.sleep(0.1)
+            # action
+            pbar2.update(1)
+
+
+# with tqdm(total=a-1, desc='Example', leave=False, unit='img', unit_scale=True) as pbar1:
+#     for P_index in range(a-1):
+#         test(a - P_index)
+#         time.sleep(0.5)
+#         pbar1.update(1)
+
+
+a = 100
+with tqdm(total=a, leave=False, unit='img', unit_scale=True) as bar:
+    for i in range(a):
+        bar.set_description('No.%d ' % i)
+        test(a)
+        time.sleep(0.1)
+        bar.update(1)
 
 

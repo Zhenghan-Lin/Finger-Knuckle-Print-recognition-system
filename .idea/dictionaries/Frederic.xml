@@ -4,6 +4,7 @@
       <w>convolutional</w>
       <w>minibatch</w>
       <w>ndarray</w>
+      <w>pbar</w>
       <w>printoptions</w>
       <w>tqdm</w>
     </words>

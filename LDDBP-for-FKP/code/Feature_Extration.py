@@ -10,8 +10,9 @@ import json
 
 class FeatureExtraction:
     def __init__(self, name=""):
-        self.GABOR_PATH = r"./gabor_data/10_0318.npy"    # Gabor文件的路径
-        # self.GABOR_PATH = r"./gabor_data/9_9932.npy"    # Gabor文件的路径
+        self.GABOR_PATH = r"./gabor_data/9_9932.npy"    # Gabor文件的路径
+        # self.GABOR_PATH = r"./gabor_data/10_0318.npy"    # Gabor文件的路径
+        # self.FLAG_FOR_GABOR = True      # TRUE,采取论文中的Gabor核;FALSE,采用自己生成的gabor核
         self.FLAG_FOR_GABOR = False      # TRUE,采取论文中的Gabor核;FALSE,采用自己生成的gabor核
         self.LAMBDA = 9.9932            # 波长
         # self.LAMBDA = 10.0318         # 波长
@@ -311,13 +312,16 @@ if __name__ == '__main__':
     #     descriptor_list.append(descriptor)
     #     print("==============No.%d is finished!==============" % count)
     #     count += 1
-    # np.save(r'./descriptor_list/minibatch_descriptor_9_9932', descriptor_list)
+    # # np.save(r'./descriptor_list/minibatch_descriptor_', descriptor_list)
+    # # np.save(r'./descriptor_list/minibatch_descriptor_9_9932', descriptor_list)
+    # np.save(r'./descriptor_list/minibatch_descriptor_10_0318', descriptor_list)
     # print("=====================All finished!=====================")
 
     """confirm the threshold of classification"""
-    sample = FeatureExtraction(r'../img/sample.jpg')
+    sample = FeatureExtraction(r'../ROI images/001_left index/02ROI.jpg')
     descriptor = sample.LDDBP()
     # data = np.load(r'./descriptor_list/minibatch_descriptor_.npy')
+    # data = np.load(r'./descriptor_list/minibatch_descriptor_9_9932.npy')
     data = np.load(r'./descriptor_list/minibatch_descriptor_10_0318.npy')
     score_list = np.zeros(len(data))
     for i in range(len(data)):
@@ -326,4 +330,6 @@ if __name__ == '__main__':
         score_list[i] = score
         if i == 11:
             print('=====================================')
+    # np.savetxt(r'./scores/scores_.txt', score_list, fmt='%f')
+    # np.savetxt(r'./scores/scores_9_9932.txt', score_list, fmt='%f')
     np.savetxt(r'./scores/scores_10_0318.txt', score_list, fmt='%f')
