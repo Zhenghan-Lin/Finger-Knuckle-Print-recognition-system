@@ -1,11 +1,14 @@
 <component name="ProjectDictionaryState">
   <dictionary name="Frederic">
     <words>
+      <w>blocksize</w>
       <w>convolutional</w>
       <w>minibatch</w>
       <w>ndarray</w>
+      <w>notreverse</w>
       <w>pbar</w>
       <w>printoptions</w>
+      <w>samplename</w>
       <w>tqdm</w>
     </words>
   </dictionary>

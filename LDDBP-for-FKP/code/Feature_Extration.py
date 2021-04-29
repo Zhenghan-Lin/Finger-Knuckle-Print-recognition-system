@@ -12,11 +12,20 @@ class FeatureExtraction:
     def __init__(self, name=""):
         self.GABOR_PATH = r"./gabor_data/9_9932.npy"    # Gabor文件的路径
         # self.GABOR_PATH = r"./gabor_data/10_0318.npy"    # Gabor文件的路径
+
         # self.FLAG_FOR_GABOR = True      # TRUE,采取论文中的Gabor核;FALSE,采用自己生成的gabor核
         self.FLAG_FOR_GABOR = False      # TRUE,采取论文中的Gabor核;FALSE,采用自己生成的gabor核
+
+        # self.FLAG_FOR_REVERSAL = True   # TRUE,图像取反;FALSE,正常图像
+        self.FLAG_FOR_REVERSAL = False   # TRUE,图像取反;FALSE,正常图像
+
+        # self.BLOCK_SIZE = 8            # 分块大小
+        self.BLOCK_SIZE = 16            # 分块大小
+        # self.BLOCK_SIZE = 24            # 分块大小
+        # self.BLOCK_SIZE = 32            # 分块大小
+
         self.LAMBDA = 9.9932            # 波长
         # self.LAMBDA = 10.0318         # 波长
-
         self.BANDWIDTH = 1              # 带宽
         self.THETA_NUM = 12             # 方向数目，即LDDBP编码位数
         self.GAMMA = 1                  # 长宽比，=1时为圆形
@@ -28,11 +37,26 @@ class FeatureExtraction:
         self.IMG_COL = 220              # ROI图像的宽，即列数
         self.ROW_Multiply_COL = self.IMG_ROW * self.IMG_COL     # 行数*列数
         self.IMG_NAME = name            # Img的路径
-        self.BLOCK_SIZE = 16            # 分块大小
+
         self.BLOCK_NUM = math.floor(self.IMG_ROW / self.BLOCK_SIZE) * math.floor(self.IMG_COL / self.BLOCK_SIZE)
         # print(self.SIGMA)
 
-    def reset(self, name):
+    def reset(self, Gabor=9, block_size=16, reversal=True):
+        """
+        :param Gabor: the version of Gabor kernels
+        :param block_size: As the term suggests.
+        :param reversal: Flag for reversal.
+        :return: None
+        """
+        if Gabor == 9:
+            self.GABOR_PATH = r"./gabor_data/9_9932.npy"
+        else:
+            self.GABOR_PATH = r"./gabor_data/10_0318.npy"
+
+        self.BLOCK_SIZE = block_size
+        self.FLAG_FOR_REVERSAL = reversal
+
+    def rename(self, name):
         self.IMG_NAME = name
 
     def generateGaborKernel(self):      # 计算gabor核
@@ -158,7 +182,8 @@ class FeatureExtraction:
             gabor_kernels = self.loadGaborKernel(self.GABOR_PATH)  # use the npy file
 
         # reverse the image
-        img = self.reverseImage(img)
+        if self.FLAG_FOR_REVERSAL:
+            img = self.reverseImage(img)
 
         # the process of convolution
         convolutional_result = []
@@ -217,11 +242,14 @@ class FeatureExtraction:
 
         return Lm, Ls
 
-    def LDDBP(self):
+    def LDDBP(self, Gabor, Block_size, Reversal):
         """
         generate LDDBP-based descriptor.
         :return: LDDBP-code ndarray
         """
+        self.reset(Gabor, Block_size, Reversal)
+        print('Gabor version: {} \t Block size: {:d} \t Reversal: {}'
+              .format(self.GABOR_PATH, self.BLOCK_SIZE, self.FLAG_FOR_REVERSAL))
         # get Lm & Ls maps
         Lm, Ls = self.generateLDDBPMaps()
 
@@ -294,44 +322,76 @@ class FeatureExtraction:
         return score
 
 
-if __name__ == '__main__':
-    # sample = FeatureExtraction(r"../img/sample.jpg")
-    # code = sample.LDDBP()
-
-    # np.save(r"./gabor_data/10_0318", gabor1)
-
-    """Save the descriptor list"""
-    # todo 保存9_9932编码
+def saveDescriptorList(Gabor=9, Block_size=16, Reversal=True, Universal_set=False):
+    """
+    Save the descriptor list with different parameters.
+    :param Gabor: the version of Gabor kernels.
+    :param Block_size: just as the term suggests.
+    :param Reversal: flag for reversing images.
+    :param Universal_set: flag for using universal set.
+    :return: None
+    """
     a = FeatureExtraction()
     count = 1
     descriptor_list = []
-    files = glob.glob(r"../mini-batch/*/*.jpg")
+
+    # use universal set or not.
+    if Universal_set:
+        files = glob.glob(r"../ROI Images/*/*.jpg")
+        prefix_universality = 'Universal'
+    else:
+        files = glob.glob(r"../mini-batch/*/*.jpg")
+        prefix_universality = 'Minibatch'
+
+    # loops start!
     for i in files:
-        a.reset(i)
-        descriptor = a.LDDBP()
+        a.rename(i)
+        descriptor = a.LDDBP(Gabor, Block_size, Reversal)
         descriptor.tolist()
         descriptor_list.append(descriptor)
         print("==============No.%d is finished!==============" % count)
         count += 1
-    # np.save(r'./descriptor_list/minibatch_descriptor_', descriptor_list)
-    # np.save(r'./descriptor_list/minibatch_descriptor_9_9932', descriptor_list)
-    np.save(r'./descriptor_list/universal_batch_descriptor_9_9932', descriptor_list)
-    # np.save(r'./descriptor_list/minibatch_descriptor_10_0318', descriptor_list)
+    filepath = r'./descriptor_list/'+prefix_universality + \
+               '_descriptor_'+str(Gabor)+'_block'+str(Block_size)+'_'+str(Reversal)
+    np.save(filepath, descriptor_list)
     print("=====================All finished!=====================")
 
+
+def checkout(Samplename, filepath, Gabor, Block_size, Reversal):
+    """
+    do some checkout and confirm the threshold of a given descriptor list.
+    :param Samplename: the path of sample image.
+    :param filepath: the path of descriptor list.
+    :param Gabor: the version of Gabor.
+    :param Block_size: just as the term suggests.
+    :param Reversal: flag for reversal.
+    :return: None
+    """
+    sample = FeatureExtraction(Samplename)
+    descriptor = sample.LDDBP(Gabor, Block_size, Reversal)
+    data = np.load(filepath)
+    score_list = np.zeros(len(data))
+    for i in range(len(data)):
+        score = sample.match(descriptor, data[i])
+        print(score)
+        score_list[i] = score
+        if i == 11:
+            print('=====================================')
+    path = r'./scores/scores_'+str(Gabor)+'_block'+str(Block_size)+'_'+str(Reversal)+'.txt'
+    np.savetxt(path, score_list, fmt='%f')
+
+
+if __name__ == '__main__':
+    """test"""
+    # sample = FeatureExtraction(r"../img/sample.jpg")
+    # code = sample.LDDBP()
+    # np.save(r"./gabor_data/10_0318", gabor1)
+
+    """Save the descriptor list"""
+    # saveDescriptorList(Gabor=9, Block_size=16, Reversal=False, Universal_set=False)
+
     """confirm the threshold of classification"""
-    # sample = FeatureExtraction(r'../ROI images/001_left index/02ROI.jpg')
-    # descriptor = sample.LDDBP()
-    # # data = np.load(r'./descriptor_list/minibatch_descriptor_.npy')
-    # # data = np.load(r'./descriptor_list/minibatch_descriptor_9_9932.npy')
-    # data = np.load(r'./descriptor_list/minibatch_descriptor_10_0318.npy')
-    # score_list = np.zeros(len(data))
-    # for i in range(len(data)):
-    #     score = sample.match(descriptor, data[i])
-    #     print(score)
-    #     score_list[i] = score
-    #     if i == 11:
-    #         print('=====================================')
-    # # np.savetxt(r'./scores/scores_.txt', score_list, fmt='%f')
-    # # np.savetxt(r'./scores/scores_9_9932.txt', score_list, fmt='%f')
-    # np.savetxt(r'./scores/scores_10_0318.txt', score_list, fmt='%f')
+    sample_path = r'../ROI images/001_left index/09ROI.jpg'
+    descriptor_path = r'descriptor_list/Minibatch_descriptor_9_block16_False.npy'
+    checkout(sample_path, descriptor_path, Gabor=9, Block_size=16, Reversal=False)
+

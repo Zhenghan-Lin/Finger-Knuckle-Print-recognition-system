@@ -1,6 +1,7 @@
 import cv2 as cv
 import numpy as np
 import math
+import pandas as pd
 from scipy import io as scio
 from scipy import signal
 import matplotlib.pyplot as plt
@@ -36,18 +37,3 @@ import matplotlib.pyplot as plt
 # ax_mag.set_axis_off()
 # # plt.savefig(r"../img/convelutional_result.jpg")
 # plt.show()
-
-# a = []
-# for i in range(10):
-#     a.append([i, i])
-# print(a)
-# # np.savetxt(r'./scores/test.txt', a, delimiter='\t', fmt='%f')
-# b = np.loadtxt(r'./scores/test.txt')
-# print(type(b))
-# c = np.insert(b, b.shape[0], [3, 3], axis=0)
-# print(type(c))
-# np.savetxt(r'./scores/test.txt', c, delimiter='\t', fmt='%f')
-
-a = [1,2,3,4,5,6]
-b = np.ones((1, 6), order='F')
-print(b.shape)
