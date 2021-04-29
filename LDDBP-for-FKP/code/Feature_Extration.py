@@ -50,8 +50,10 @@ class FeatureExtraction:
         """
         if Gabor == 9:
             self.GABOR_PATH = r"./gabor_data/9_9932.npy"
-        else:
+        elif Gabor == 10:
             self.GABOR_PATH = r"./gabor_data/10_0318.npy"
+        else:
+            self.FLAG_FOR_GABOR = True
 
         self.BLOCK_SIZE = block_size
         self.FLAG_FOR_REVERSAL = reversal
@@ -248,8 +250,8 @@ class FeatureExtraction:
         :return: LDDBP-code ndarray
         """
         self.reset(Gabor, Block_size, Reversal)
-        print('Gabor version: {} \t Block size: {:d} \t Reversal: {}'
-              .format(self.GABOR_PATH, self.BLOCK_SIZE, self.FLAG_FOR_REVERSAL))
+        print('Gabor version: {:d} \t Block size: {:d} \t Reversal: {}'
+              .format(Gabor, self.BLOCK_SIZE, self.FLAG_FOR_REVERSAL))
         # get Lm & Ls maps
         Lm, Ls = self.generateLDDBPMaps()
 
@@ -405,10 +407,9 @@ if __name__ == '__main__':
     # np.save(r"./gabor_data/10_0318", gabor1)
 
     """Save the descriptor list"""
-    # saveDescriptorList(Gabor=9, Block_size=24, Reversal=True, Universal_set=False)
+    # saveDescriptorList(Gabor=1, Block_size=24, Reversal=True, Universal_set=False)
 
     """confirm the threshold of classification"""
-    sample_path = r'../ROI images/001_left index/06ROI.jpg'
-    descriptor_path = r'descriptor_list/Minibatch_descriptor_9_block24_True.npy'
-    checkout(sample_path, descriptor_path, Gabor=9, Block_size=24, Reversal=True)
-
+    sample_path = r'../ROI images/001_left index/02ROI.jpg'
+    descriptor_path = r'descriptor_list/Minibatch_descriptor_1_block24_True.npy'
+    checkout(sample_path, descriptor_path, Gabor=1, Block_size=24, Reversal=True)

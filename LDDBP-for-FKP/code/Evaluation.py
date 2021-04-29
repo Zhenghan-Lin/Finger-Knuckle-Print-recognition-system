@@ -136,10 +136,11 @@ class Evaluation:
 
 if __name__ == '__main__':
     # todo 测试最佳分类阈值
-    descriptor_path = r'descriptor_list/Minibatch_descriptor_9_block16_True.npy'
-    threshold = 1.3800
-    Gabor = 9
-    Block_size = 16
+    # todo 测试时的得分，和评价时的得分差别很大，查查看
+    descriptor_path = r'descriptor_list/Minibatch_descriptor_1_block24_True.npy'
+    threshold = 0.7923
+    Gabor = 1
+    Block_size = 24
     Reversal = True
     flag_for_minibatch = True
     tester = Evaluation(descriptor_path, threshold, Gabor, Block_size, Reversal, flag_for_minibatch)
