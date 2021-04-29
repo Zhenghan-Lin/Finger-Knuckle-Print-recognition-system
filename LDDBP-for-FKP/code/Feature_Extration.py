@@ -405,10 +405,10 @@ if __name__ == '__main__':
     # np.save(r"./gabor_data/10_0318", gabor1)
 
     """Save the descriptor list"""
-    # saveDescriptorList(Gabor=9, Block_size=16, Reversal=True, Universal_set=False)
+    # saveDescriptorList(Gabor=9, Block_size=24, Reversal=True, Universal_set=False)
 
     """confirm the threshold of classification"""
-    sample_path = r'../ROI images/001_left index/09ROI.jpg'
-    descriptor_path = r'descriptor_list/Minibatch_descriptor_9_block16_True.npy'
-    checkout(sample_path, descriptor_path, Gabor=9, Block_size=16, Reversal=True)
+    sample_path = r'../ROI images/001_left index/06ROI.jpg'
+    descriptor_path = r'descriptor_list/Minibatch_descriptor_9_block24_True.npy'
+    checkout(sample_path, descriptor_path, Gabor=9, Block_size=24, Reversal=True)
 
