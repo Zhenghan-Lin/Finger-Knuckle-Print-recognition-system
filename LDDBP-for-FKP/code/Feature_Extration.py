@@ -370,13 +370,30 @@ def checkout(Samplename, filepath, Gabor, Block_size, Reversal):
     sample = FeatureExtraction(Samplename)
     descriptor = sample.LDDBP(Gabor, Block_size, Reversal)
     data = np.load(filepath)
-    score_list = np.zeros(len(data))
+    # score_list = np.zeros(len(data))
+
+    score_list = []
+    positive_score = []
+    negative_score = []
+
     for i in range(len(data)):
         score = sample.match(descriptor, data[i])
         print(score)
-        score_list[i] = score
+        # score_list[i] = score
+
+        score_list.append(score)
+        if i <= 11:
+            positive_score.append(score)
+        else:
+            negative_score.append(score)
+
         if i == 11:
             print('=====================================')
+
+    positive_score.sort(reverse=True)
+    print(positive_score)
+    negative_score.sort(reverse=False)
+    print(negative_score)
     path = r'./scores/scores_'+str(Gabor)+'_block'+str(Block_size)+'_'+str(Reversal)+'.txt'
     np.savetxt(path, score_list, fmt='%f')
 
@@ -388,10 +405,10 @@ if __name__ == '__main__':
     # np.save(r"./gabor_data/10_0318", gabor1)
 
     """Save the descriptor list"""
-    # saveDescriptorList(Gabor=9, Block_size=16, Reversal=False, Universal_set=False)
+    # saveDescriptorList(Gabor=9, Block_size=16, Reversal=True, Universal_set=False)
 
     """confirm the threshold of classification"""
     sample_path = r'../ROI images/001_left index/09ROI.jpg'
-    descriptor_path = r'descriptor_list/Minibatch_descriptor_9_block16_False.npy'
-    checkout(sample_path, descriptor_path, Gabor=9, Block_size=16, Reversal=False)
+    descriptor_path = r'descriptor_list/Minibatch_descriptor_9_block16_True.npy'
+    checkout(sample_path, descriptor_path, Gabor=9, Block_size=16, Reversal=True)
 
