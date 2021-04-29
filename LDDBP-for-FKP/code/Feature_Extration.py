@@ -302,35 +302,36 @@ if __name__ == '__main__':
 
     """Save the descriptor list"""
     # todo 保存9_9932编码
-    # a = FeatureExtraction()
-    # count = 1
-    # descriptor_list = []
-    # files = glob.glob(r"../mini-batch/*/*.jpg")
-    # for i in files:
-    #     a.reset(i)
-    #     descriptor = a.LDDBP()
-    #     descriptor.tolist()
-    #     descriptor_list.append(descriptor)
-    #     print("==============No.%d is finished!==============" % count)
-    #     count += 1
-    # # np.save(r'./descriptor_list/minibatch_descriptor_', descriptor_list)
-    # # np.save(r'./descriptor_list/minibatch_descriptor_9_9932', descriptor_list)
+    a = FeatureExtraction()
+    count = 1
+    descriptor_list = []
+    files = glob.glob(r"../mini-batch/*/*.jpg")
+    for i in files:
+        a.reset(i)
+        descriptor = a.LDDBP()
+        descriptor.tolist()
+        descriptor_list.append(descriptor)
+        print("==============No.%d is finished!==============" % count)
+        count += 1
+    # np.save(r'./descriptor_list/minibatch_descriptor_', descriptor_list)
+    # np.save(r'./descriptor_list/minibatch_descriptor_9_9932', descriptor_list)
+    np.save(r'./descriptor_list/universal_batch_descriptor_9_9932', descriptor_list)
     # np.save(r'./descriptor_list/minibatch_descriptor_10_0318', descriptor_list)
-    # print("=====================All finished!=====================")
+    print("=====================All finished!=====================")
 
     """confirm the threshold of classification"""
-    sample = FeatureExtraction(r'../ROI images/001_left index/02ROI.jpg')
-    descriptor = sample.LDDBP()
-    # data = np.load(r'./descriptor_list/minibatch_descriptor_.npy')
-    # data = np.load(r'./descriptor_list/minibatch_descriptor_9_9932.npy')
-    data = np.load(r'./descriptor_list/minibatch_descriptor_10_0318.npy')
-    score_list = np.zeros(len(data))
-    for i in range(len(data)):
-        score = sample.match(descriptor, data[i])
-        print(score)
-        score_list[i] = score
-        if i == 11:
-            print('=====================================')
-    # np.savetxt(r'./scores/scores_.txt', score_list, fmt='%f')
-    # np.savetxt(r'./scores/scores_9_9932.txt', score_list, fmt='%f')
-    np.savetxt(r'./scores/scores_10_0318.txt', score_list, fmt='%f')
+    # sample = FeatureExtraction(r'../ROI images/001_left index/02ROI.jpg')
+    # descriptor = sample.LDDBP()
+    # # data = np.load(r'./descriptor_list/minibatch_descriptor_.npy')
+    # # data = np.load(r'./descriptor_list/minibatch_descriptor_9_9932.npy')
+    # data = np.load(r'./descriptor_list/minibatch_descriptor_10_0318.npy')
+    # score_list = np.zeros(len(data))
+    # for i in range(len(data)):
+    #     score = sample.match(descriptor, data[i])
+    #     print(score)
+    #     score_list[i] = score
+    #     if i == 11:
+    #         print('=====================================')
+    # # np.savetxt(r'./scores/scores_.txt', score_list, fmt='%f')
+    # # np.savetxt(r'./scores/scores_9_9932.txt', score_list, fmt='%f')
+    # np.savetxt(r'./scores/scores_10_0318.txt', score_list, fmt='%f')
