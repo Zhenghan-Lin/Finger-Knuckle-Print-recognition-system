@@ -37,36 +37,17 @@ import matplotlib.pyplot as plt
 # # plt.savefig(r"../img/convelutional_result.jpg")
 # plt.show()
 
+# a = []
+# for i in range(10):
+#     a.append([i, i])
+# print(a)
+# # np.savetxt(r'./scores/test.txt', a, delimiter='\t', fmt='%f')
+# b = np.loadtxt(r'./scores/test.txt')
+# print(type(b))
+# c = np.insert(b, b.shape[0], [3, 3], axis=0)
+# print(type(c))
+# np.savetxt(r'./scores/test.txt', c, delimiter='\t', fmt='%f')
 
-import pandas as pd
-import numpy as np
-import time
-import sys
-from tqdm import tqdm, trange
-
-
-def test(total):
-    with tqdm(total=total, leave=False, unit='img') as pbar2:
-        for Q_index in range(total):
-            pbar2.set_description('No.%d is processed!' % Q_index)
-            time.sleep(0.1)
-            # action
-            pbar2.update(1)
-
-
-# with tqdm(total=a-1, desc='Example', leave=False, unit='img', unit_scale=True) as pbar1:
-#     for P_index in range(a-1):
-#         test(a - P_index)
-#         time.sleep(0.5)
-#         pbar1.update(1)
-
-
-a = 100
-with tqdm(total=a, leave=False, unit='img', unit_scale=True) as bar:
-    for i in range(a):
-        bar.set_description('No.%d ' % i)
-        test(a)
-        time.sleep(0.1)
-        bar.update(1)
-
-
+a = [1,2,3,4,5,6]
+b = np.ones((1, 6), order='F')
+print(b.shape)

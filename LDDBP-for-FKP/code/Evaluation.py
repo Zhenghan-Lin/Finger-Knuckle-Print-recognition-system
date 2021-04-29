@@ -29,6 +29,18 @@ class Evaluation:
         self.DESCRIPTOR_LIST = np.load(filepath)
         print("loading process done!")
 
+    def savaData(self, filename, valuelist):
+        # todo 用pandas记录数据
+        temp = np.loadtxt(filename)
+        value_array = np.zeros((1, 6), order='F', dtype=float)
+        for i in range(6):
+            value_array[0][i] = valuelist[i]
+        if temp.shape[0] > 0:
+            data = np.insert(temp, temp.shape[0], value_array, axis=0)
+            np.savetxt(filename, data, delimiter='\t', fmt='%f')
+        else:
+            np.savetxt(filename, value_array, delimiter='\t', fmt='%f')
+
     def match(self, sample_P, sample_Q):
         """
         the match method based on Chi-square distance.
@@ -93,6 +105,16 @@ class Evaluation:
                         else:                           # classified as negative
                             self.TN += 1
                 pbar.update(1)
+        # calculate some evaluating indicators
+        Genuine = self.TP+self.FN
+        Imposter = self.TN+self.FP
+        Total = self.TP+self.TN+self.FP+self.FN
+        Precision = self.TP / (self.TP + self.FP)
+        Recall = self.TP / (self.TP + self.FN)
+        FPR = self.FP / (self.FP + self.TN)
+        TPR = self.TP / (self.TP + self.FN)
+        F1_measure = 2 * Precision * Recall / (Precision + Recall)
+
         # save data
         """original"""
         # np.savetxt(r'./Genuine/Genuine_.txt', self.GENUINE, delimiter='\t', fmt='%f')
@@ -104,22 +126,28 @@ class Evaluation:
         np.savetxt(r'./Imposter/Imposter_9.txt', self.IMPOSTER, delimiter='\t', fmt='%f')
         np.savetxt(r'./FP_list/FP_list_9.txt', self.FP_LIST, delimiter='\t', fmt='%f')
         np.savetxt(r'./FN_list/FN_list_9.txt', self.FN_LIST, delimiter='\t', fmt='%f')
+        # self.savaData(r'./result/result_9_9932.txt', [self.THRESHOLD, Precision, Recall, TPR, FPR, F1_measure])
+        temp = np.loadtxt(r'./result/result_9_9932.txt')
+        result = np.insert(temp, temp.shape[0], [self.THRESHOLD, Precision, Recall, TPR, FPR, F1_measure], axis=0)
+        np.savetxt(r'./result/result_9_9932.txt', result, delimiter='\t', fmt='%f')
         """10.0318"""
         # np.savetxt(r'./Genuine/Genuine_10.txt', self.GENUINE, delimiter='\t', fmt='%f')
         # np.savetxt(r'./Imposter/Imposter_10.txt', self.IMPOSTER, delimiter='\t', fmt='%f')
         # np.savetxt(r'./FP_list/FP_list_10.txt', self.FP_LIST, delimiter='\t', fmt='%f')
         # np.savetxt(r'./FN_list/FN_list_10.txt', self.FN_LIST, delimiter='\t', fmt='%f')
         print('saving process finished!')
+        print('Genuine: {:d} \t Imposter: {:d} \t Total: {:d}'.format(Genuine, Imposter, Total))
         print('TP: {:d} \t FN: {:d} \t TN: {:d} \t FP: {:d}'.format(self.TP, self.FN, self.TN, self.FP))
-        print('Precision: {:%}'.format(self.TP / (self.TP + self.FP)))
-        print('Recall: {:%}'.format(self.TP / (self.TP + self.FN)))
-        print('FPR: {:%} '.format(self.FP / (self.FP + self.TN)))
-        print('TPR: {:%} '.format(self.TP / (self.TP + self.FN)))
+        print('Precision: {:%}'.format(Precision))
+        print('Recall: {:%}'.format(Recall))
+        print('TPR: {:%} '.format(TPR))
+        print('FPR: {:%} '.format(FPR))
+        print('F1-measure: {:f}'.format(F1_measure))
 
 
 if __name__ == '__main__':
     # todo 测试最佳分类阈值
     # tester = Evaluation(r'./descriptor_list/minibatch_descriptor_.npy', 1.400)
-    tester = Evaluation(r'./descriptor_list/minibatch_descriptor_9_9932.npy', 1.380)
+    tester = Evaluation(r'./descriptor_list/minibatch_descriptor_9_9932.npy', 1.3700)
     # tester = Evaluation(r'./descriptor_list/minibatch_descriptor_10_0318.npy', 1.400)
     tester.evaluate()
