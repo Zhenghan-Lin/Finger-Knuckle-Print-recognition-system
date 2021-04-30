@@ -30,8 +30,7 @@ class Evaluation:
         self.IMG_ROW = 110              # ROI图像的高，即行数
         self.IMG_COL = 220              # ROI图像的宽，即列数
         self.ROW_Multiply_COL = self.IMG_ROW * self.IMG_COL     # 行数*列数
-        self.BLOCK_NUM = math.floor(self.IMG_ROW / self.BLOCK_SIZE) * \
-                         math.floor(self.IMG_COL / self.BLOCK_SIZE)         # 分块总数
+        self.BLOCK_NUM = math.floor(self.IMG_ROW / self.BLOCK_SIZE) * math.floor(self.IMG_COL / self.BLOCK_SIZE)
         self.TP, self.TN, self.FP, self.FN = 0, 0, 0, 0     # sum of TP/TN/FP/FN
         self.FP_LIST, self.FN_LIST = [], []                 # storage of mis-classification
         self.GENUINE, self.IMPOSTER = [], []                # storage of each category
@@ -138,7 +137,7 @@ if __name__ == '__main__':
     # todo 测试最佳分类阈值
     # todo 测试时的得分，和评价时的得分差别很大，查查看
     descriptor_path = r'descriptor_list/Minibatch_descriptor_1_block24_True.npy'
-    threshold = 0.7923
+    threshold = 0.7951
     Gabor = 1
     Block_size = 24
     Reversal = True
