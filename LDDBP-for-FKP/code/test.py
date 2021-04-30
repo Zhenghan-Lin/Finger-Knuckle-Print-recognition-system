@@ -37,7 +37,5 @@ import matplotlib.pyplot as plt
 # ax_mag.set_axis_off()
 # # plt.savefig(r"../img/convelutional_result.jpg")
 # plt.show()
-
-a = 5//2
-print(a)
-print(type(a))
+print('\033[31mWarning: \033[0m')
+print('\033[31mNan has occurred {:d} times, please check \033[0m'.format(1))

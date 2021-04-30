@@ -34,6 +34,9 @@ class Evaluation:
         self.TP, self.TN, self.FP, self.FN = 0, 0, 0, 0     # sum of TP/TN/FP/FN
         self.FP_LIST, self.FN_LIST = [], []                 # storage of mis-classification
         self.GENUINE, self.IMPOSTER = [], []                # storage of each category
+        # todo 初始化统计nan的工具
+        self.NAN_LIST = []      # collect abnormal information of nan
+        self.NAN_COUNT = 0
 
     def match(self, sample_P, sample_Q):
         """
@@ -78,6 +81,10 @@ class Evaluation:
 
                     # calculate the score
                     score = self.match(self.DESCRIPTOR_LIST[P_index], self.DESCRIPTOR_LIST[Q_index])
+                    # todo 统计nan信息
+                    if np.isnan(score):
+                        self.NAN_LIST.append((P_index, Q_index, score))
+                        self.NAN_COUNT += 1
 
                     # whether Q belongs to group P
                     # TODO 统计Genuine/Imposter各个分数的数量
@@ -121,6 +128,8 @@ class Evaluation:
             columns=['Threshold', 'Precision', 'Recall', 'TPR', 'FPR', 'F1-measure']
         )
         df.to_csv(r'./result/result_'+suffix+'.csv', mode='a+', index=False, sep='\t', float_format='%.6f')
+        # todo 将nan信息写入磁盘
+        np.savetxt(r'./Nan/Nan_'+suffix+'.txt', self.NAN_LIST, delimiter='\t', fmt='%f')
 
         # print results
         print('saving process finished!')
@@ -131,15 +140,20 @@ class Evaluation:
         print('TPR: {:%} '.format(TPR))
         print('FPR: {:%} '.format(FPR))
         print('F1-measure: {:f}'.format(F1_measure))
+        # todo 打印提示信息
+        if self.NAN_COUNT > 0:
+            print('\033[31mWarning: \033[0m')
+            print('\033[31mWarning: Nan has occurred {:d} times, '
+                  'please check files for more details. \033[0m'.format(self.NAN_COUNT))
 
 
 if __name__ == '__main__':
     # todo 测试最佳分类阈值
     # todo 测试时的得分，和评价时的得分差别很大，查查看
-    descriptor_path = r'descriptor_list/Minibatch_descriptor_1_block24_True.npy'
-    threshold = 0.7951
+    descriptor_path = r'descriptor_list/Minibatch_descriptor_1_block8_True.npy'
+    threshold = 0.3295
     Gabor = 1
-    Block_size = 24
+    Block_size = 8
     Reversal = True
     flag_for_minibatch = True
     tester = Evaluation(descriptor_path, threshold, Gabor, Block_size, Reversal, flag_for_minibatch)

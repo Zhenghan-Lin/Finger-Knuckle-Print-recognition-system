@@ -300,7 +300,10 @@ class FeatureExtraction:
         quotient = 0
         for i in range(len(index_of_nonzero[0])):
             index = index_of_nonzero[0][i]
-            quotient += np.divide(square_difference[index], sum[index])
+            # temp1 = sum[index]
+            # temp2 = square_difference[index]
+            temp = np.divide(square_difference[index], sum[index])
+            quotient += temp
 
         score = quotient / self.BLOCK_NUM
         return score
@@ -368,6 +371,7 @@ def checkout(Samplename, Gabor, Block_size, Reversal):
     negative_score = []
 
     for i in range(len(data)):
+        temp = data[i]
         score = sample.match(descriptor, data[i])
         print(score)
 
@@ -411,9 +415,9 @@ if __name__ == '__main__':
     # todo 确定各个最佳参数，进行大数据集实验。
     # todo 检查compcode代码，进行对比试验。
     """Save the descriptor list"""
-    saveDescriptorList(Gabor=9, Block_size=32, Reversal=True, Universal_set=False)
+    saveDescriptorList(Gabor=1, Block_size=8, Reversal=True, Universal_set=False)
 
     """confirm the threshold of classification"""
-    # sample_path = rotate(1)
     # # descriptor_path = r'descriptor_list/Minibatch_descriptor_1_block16_True.npy'
-    # checkout(sample_path, Gabor=1, Block_size=16, Reversal=True)
+    # sample_path = rotate(1)
+    # checkout(sample_path, Gabor=1, Block_size=8, Reversal=True)
