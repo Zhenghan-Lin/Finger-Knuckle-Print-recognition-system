@@ -411,7 +411,7 @@ if __name__ == '__main__':
     # todo 确定各个最佳参数，进行大数据集实验。
     # todo 检查compcode代码，进行对比试验。
     """Save the descriptor list"""
-    saveDescriptorList(Gabor=1, Block_size=8, Reversal=True, Universal_set=False)
+    saveDescriptorList(Gabor=9, Block_size=32, Reversal=True, Universal_set=False)
 
     """confirm the threshold of classification"""
     # sample_path = rotate(1)
