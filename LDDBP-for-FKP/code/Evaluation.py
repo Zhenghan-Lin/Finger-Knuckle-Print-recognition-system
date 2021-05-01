@@ -3,29 +3,37 @@ import numpy as np
 import pandas as pd
 import math
 from tqdm import tqdm
+import time
+from sklearn.metrics import roc_auc_score
 from matplotlib import pyplot as plt
 # np.set_printoptions(threshold=np.inf)
 
 
 class Evaluation:
-    def __init__(self, filepath, threshold: float, gabor, blocksize, reversal, flag_for_minibatch: bool):
+    def __init__(self, threshold: float, gabor, blocksize, reversal, flag_for_minibatch: bool):
         """
         Initialize essential parameters.
-        :param filepath: path of descriptor list file
         :param threshold: the threshold of classification
         :param gabor: the version of Gabor kernels
         :param blocksize: the size of block
         :param reversal: flag of reversal
         :param flag_for_minibatch: flag of the use of minibatch
         """
-        print("Start Loading descriptor list!")
-        self.DESCRIPTOR_LIST = np.load(filepath)
-        print("loading process done!")
         self.THRESHOLD = threshold          # threshold for classification
         self.GABOR_VERSION = gabor          # version of gabor kernels using for file title.
         self.REVERSAL = reversal            # flag of reversal, using for file title.
         self.FLAG_FOR_MINIBATCH = flag_for_minibatch      # True, use the mini batch, vice versa.
         self.BLOCK_SIZE = blocksize            # 分块大小
+        if self.FLAG_FOR_MINIBATCH:
+            filepath = r'./descriptor_list/Minibatch_descriptor_'+str(self.GABOR_VERSION)\
+                       + '_block'+str(self.BLOCK_SIZE)+'_'+str(self.FLAG_FOR_MINIBATCH)+'.npy'
+        else:
+            filepath = r'../../../descriptor_list/Universal_descriptor_'+str(self.GABOR_VERSION)\
+                       + '_block'+str(self.BLOCK_SIZE)+'_'+str(self.FLAG_FOR_MINIBATCH)+'.npy'
+
+        print("Start Loading descriptor list {}".format(filepath))
+        self.DESCRIPTOR_LIST = np.load(filepath)
+        print("loading process done!")
 
         self.IMG_ROW = 110              # ROI图像的高，即行数
         self.IMG_COL = 220              # ROI图像的宽，即列数
@@ -65,10 +73,19 @@ class Evaluation:
         Evaluation procedure.
         :return: none
         """
+        print('Evaluation start!')
+        print('\033[1;33mGabor Version: {} \t Block size: {} \t Reversal: {} \t '
+              'Threshold: {} \t Minibatch: {}\033[0m'.
+              format(self.GABOR_VERSION, self.BLOCK_SIZE, self.REVERSAL,
+                     self.THRESHOLD, self.FLAG_FOR_MINIBATCH))
+
+        start = time.time()
         if self.FLAG_FOR_MINIBATCH:     # use mini batch for evaluation.
             picture_number = 48
+            prefix_universality = 'Minibatch'
         else:                           # use universal set for evaluation.
             picture_number = len(self.DESCRIPTOR_LIST)
+            prefix_universality = 'Universal'
 
         # evaluation start!
         with tqdm(total=picture_number-1, unit='img', unit_scale=True) as pbar:
@@ -118,18 +135,20 @@ class Evaluation:
 
         # save data
         suffix = str(self.GABOR_VERSION)+'_block'+str(self.BLOCK_SIZE)+'_'+str(self.REVERSAL)
-        np.savetxt(r'./Genuine/Genuine_'+suffix+'.txt', self.GENUINE, delimiter='\t', fmt='%f')
-        np.savetxt(r'./Imposter/Imposter_'+suffix+'.txt', self.IMPOSTER, delimiter='\t', fmt='%f')
-        np.savetxt(r'./FP_list/FP_list_'+suffix+'.txt', self.FP_LIST, delimiter='\t', fmt='%f')
-        np.savetxt(r'./FN_list/FN_list_'+suffix+'.txt', self.FN_LIST, delimiter='\t', fmt='%f')
+        np.savetxt(r'./Genuine/'+prefix_universality+'_Genuine_'+suffix+'.txt', self.GENUINE, delimiter='\t', fmt='%f')
+        np.savetxt(r'./Imposter/'+prefix_universality+'_Imposter_'+suffix+'.txt', self.IMPOSTER, delimiter='\t', fmt='%f')
+        np.savetxt(r'./FP_list/'+prefix_universality+'_FP_list_'+suffix+'.txt', self.FP_LIST, delimiter='\t', fmt='%f')
+        np.savetxt(r'./FN_list/'+prefix_universality+'_FN_list_'+suffix+'.txt', self.FN_LIST, delimiter='\t', fmt='%f')
         df = pd.DataFrame(
             {'Threshold': [self.THRESHOLD], 'Precision': [Precision],
              'Recall': [Recall], 'TPR': [TPR], 'FPR': [FPR], 'F1-measure': [F1_measure]},
             columns=['Threshold', 'Precision', 'Recall', 'TPR', 'FPR', 'F1-measure']
         )
-        df.to_csv(r'./result/result_'+suffix+'.csv', mode='a+', index=False, sep='\t', float_format='%.6f')
+        df.to_csv(r'./result/'+prefix_universality+'_result_'+suffix+'.csv', mode='a+',
+                  index=False, sep='\t', float_format='%.6f')
+
         # todo 将nan信息写入磁盘
-        np.savetxt(r'./Nan/Nan_'+suffix+'.txt', self.NAN_LIST, delimiter='\t', fmt='%f')
+        np.savetxt(r'./Nan/'+prefix_universality+'Nan_'+suffix+'.txt', self.NAN_LIST, delimiter='\t', fmt='%f')
 
         # print results
         print('saving process finished!')
@@ -142,21 +161,25 @@ class Evaluation:
         print('F1-measure: {:f}'.format(F1_measure))
         # todo 打印提示信息
         if self.NAN_COUNT > 0:
-            print('\033[31mWarning: \033[0m')
+            print('\033[31mWarning:\033[0m')
             print('\033[31mWarning: Nan has occurred {:d} times, '
-                  'please check files for more details. \033[0m'.format(self.NAN_COUNT))
+                  'please check files for more details.\033[0m'.format(self.NAN_COUNT))
+
+        # calculate time cost
+        end = time.time()
+        hour = (end - start) // 3600
+        minute = (end - start) % 3600 // 60
+        second = (end - start) - (3600 * hour) - (60 * minute)
+        print('Time cost: {:.1f} hours {:.1f} minutes {:.1f} seconds'.format(hour, minute, second))
 
 
 if __name__ == '__main__':
     # todo 测试最佳分类阈值
-    # todo 测试时的得分，和评价时的得分差别很大，查查看
-    descriptor_path = r'descriptor_list/Minibatch_descriptor_1_block8_True.npy'
-    threshold = 0.3295
-    Gabor = 1
+    # TODO 新增softmax归一化功能，并计算AUC
+    threshold = 2.3725
+    Gabor = 9
     Block_size = 8
     Reversal = True
     flag_for_minibatch = True
-    tester = Evaluation(descriptor_path, threshold, Gabor, Block_size, Reversal, flag_for_minibatch)
+    tester = Evaluation(threshold, Gabor, Block_size, Reversal, flag_for_minibatch)
     tester.evaluate()
-
-

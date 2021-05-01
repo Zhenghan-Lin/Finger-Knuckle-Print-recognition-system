@@ -328,9 +328,13 @@ def saveDescriptorList(Gabor=9, Block_size=16, Reversal=True, Universal_set=Fals
     if Universal_set:
         files = glob.glob(r"../ROI Images/*/*.jpg")
         prefix_universality = 'Universal'
+        filepath = r'../../../descriptor_list/' + prefix_universality + \
+                   '_descriptor_' + str(Gabor) + '_block' + str(Block_size) + '_' + str(Reversal)
     else:
         files = glob.glob(r"../mini-batch/*/*.jpg")
         prefix_universality = 'Minibatch'
+        filepath = r'./descriptor_list/' + prefix_universality + \
+                   '_descriptor_' + str(Gabor) + '_block' + str(Block_size) + '_' + str(Reversal)
 
     # loops start!
     for i in files:
@@ -340,8 +344,7 @@ def saveDescriptorList(Gabor=9, Block_size=16, Reversal=True, Universal_set=Fals
         descriptor_list.append(descriptor)
         print("==============No.%d is finished!==============" % count)
         count += 1
-    filepath = r'./descriptor_list/'+prefix_universality + \
-               '_descriptor_'+str(Gabor)+'_block'+str(Block_size)+'_'+str(Reversal)
+
     np.save(filepath, descriptor_list)
     print("=====================All finished!=====================")
     end = time.time()
@@ -415,9 +418,9 @@ if __name__ == '__main__':
     # todo 确定各个最佳参数，进行大数据集实验。
     # todo 检查compcode代码，进行对比试验。
     """Save the descriptor list"""
-    saveDescriptorList(Gabor=1, Block_size=8, Reversal=True, Universal_set=False)
+    saveDescriptorList(Gabor=9, Block_size=24, Reversal=True, Universal_set=True)
 
     """confirm the threshold of classification"""
     # # descriptor_path = r'descriptor_list/Minibatch_descriptor_1_block16_True.npy'
     # sample_path = rotate(1)
-    # checkout(sample_path, Gabor=1, Block_size=8, Reversal=True)
+    # checkout(sample_path, Gabor=9, Block_size=8, Reversal=True)

@@ -37,5 +37,7 @@ import matplotlib.pyplot as plt
 # ax_mag.set_axis_off()
 # # plt.savefig(r"../img/convelutional_result.jpg")
 # plt.show()
-print('\033[31mWarning: \033[0m')
-print('\033[31mNan has occurred {:d} times, please check \033[0m'.format(1))
+
+z = [1.0, 2.0, 3.0, 4.0, 1.0, 2.0, 3.0]
+a = np.exp(z)/sum(np.exp(z))
+print(type(a))
